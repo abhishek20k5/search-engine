@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Simple Search Engine</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="container">
+       <center><h1>Search Engine</h1></center>
+        <input type="text" id="searchInput" placeholder="Enter search keywords...">
+        <button id="searchButton">
+            <i class="fa fa-search"></i>
+        </button>
+        
+        </button>
+        
+        <h2>Search History</h2> 
+        <button id="clearHistoryButton">Clear History</button>
+        <ul id="searchHistory"></ul>
+        
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #0e0d0f;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+
+    max-width: 600px;
+    margin: auto;
+    background: rgba(141, 137, 137, 0.489);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+}
+
+input[type="text"] {
+    width: calc(100% - 250px);
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #090707;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+    border-color: #1159a1;
+    outline: none;
+}
+
+button {
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: #becbc0;
+    transform: scale(1.05);
+}
+
+h2 {
+    margin-top: 20px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Animation for displaying search history */
+li.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+</style>
+<script>
+class SearchHistory {
+    constructor() {
+        this.storageKey = 'searchHistory';
+    }
+
+    loadHistory() {
+        return JSON.parse(localStorage.getItem(this.storageKey)) || [];
+    }
+
+    saveTerm(term) {
+        const history = this.loadHistory();
+        if (!history.includes(term)) {
+            history.push(term);
+            localStorage.setItem(this.storageKey, JSON.stringify(history));
+        }
+    }
+
+    clearHistory() {
+        localStorage.removeItem(this.storageKey);
+    }
+}
+
+class UI {
+    constructor() {
+        this.searchInput = document.getElementById("searchInput");
+        this.searchHistoryList = document.getElementById("searchHistory");
+        this.searchHistory = new SearchHistory();
+    }
+
+    displayHistory() {
+        const history = this.searchHistory.loadHistory();
+        this.searchHistoryList.innerHTML = history.map(term => `<li>${term}</li>`).join('');
+        this.animateHistoryItems();
+    }
+
+    clearHistoryDisplay() {
+        this.searchHistoryList.innerHTML = '';
+    }
+
+    getSearchTerm() {
+        return this.searchInput.value.trim();
+    }
+
+    clearInput() {
+        this.searchInput.value = '';
+    }
+
+    animateHistoryItems() {
+        const items = this.searchHistoryList.querySelectorAll('li');
+        items.forEach((item, index) => {
+            setTimeout(() => {
+                item.classList.add('visible');
+            }, index * 100); // Delay for each item
+        });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const ui = new UI();
+
+    ui.displayHistory();
+
+    document.getElementById("searchButton").addEventListener("click", () => {
+        const term = ui.getSearchTerm();
+        if (term) {
+            ui.searchHistory.saveTerm(term);
+            ui.displayHistory();
+            ui.clearInput();
+        }
+    });
+
+    document.getElementById("clearHistoryButton").addEventListener("click", () => {
+        ui.searchHistory.clearHistory();
+        ui.clearHistoryDisplay();
+    });
+});
+
+</script>
+
